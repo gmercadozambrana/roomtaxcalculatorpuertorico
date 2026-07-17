@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Calculadora de RoomTax by Lumen & Lobe LLC</title>
+<style>
+  :root{
+    --teal:#1B4B43;
+    --teal-dark:#123832;
+    --paper:#F7F4EC;
+    --card:#FFFFFF;
+    --ink:#20241F;
+    --muted:#3F4239;
+    --gold:#B8863B;
+    --line:#DDD8C8;
+    --danger:#A23A2E;
+    --ok:#2F6E4E;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:Georgia,'Iowan Old Style','Times New Roman',serif;
+    padding:0 0 60px 0;
+  }
+  .topbar{
+    background:var(--teal);
+    color:#fff;
+    padding:22px 32px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:4px solid var(--gold);
+  }
+  .topbar h1{
+    font-size:20px;
+    margin:0;
+    font-weight:600;
+    letter-spacing:.3px;
+  }
+  .topbar .tag{
+    font-family:'Courier New',monospace;
+    font-size:12px;
+    background:rgba(255,255,255,.12);
+    padding:6px 10px;
+    border-radius:3px;
+    letter-spacing:.5px;
+  }
+  .wrap{
+    max-width:980px;
+    margin:0 auto;
+    padding:32px 24px;
+  }
+  .step{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:24px 28px;
+    margin-bottom:22px;
+    position:relative;
+  }
+  .step-num{
+    position:absolute;
+    top:-14px;
+    left:24px;
+    background:var(--teal);
+    color:#fff;
+    font-family:'Courier New',monospace;
+    font-size:12px;
+    padding:4px 10px;
+    border-radius:2px;
+    letter-spacing:1px;
+  }
+  .step h2{
+    font-size:17px;
+    margin:6px 0 4px 0;
+    color:var(--teal-dark);
+  }
+  .step p.desc{
+    font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    font-size:16px;
+    color:var(--muted);
+    margin:0 0 16px 0;
+    line-height:1.5;
+  }
+  label{
+    display:block;
+    font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    font-size:15.5px;
+    color:var(--muted);
+    margin-bottom:4px;
+    margin-top:12px;
+  }
+  input[type=file], input[type=number], input[type=text], select{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    font-family:'Courier New',monospace;
+    font-size:16px;
+    background:#FCFBF7;
+    color:var(--ink);
+  }
+  input:focus, select:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;}
+  .csv-status{
+    font-family:'Courier New',monospace;
+    font-size:16px;
+    margin-top:12px;
+    padding:10px 12px;
+    border-radius:3px;
+    background:#EEF3EC;
+    color:var(--ok);
+    display:none;
+  }
+  .csv-status.show{display:block;}
+  .csv-status.warn{background:#FBEDE9; color:var(--danger);}
+  .hint{
+    font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    font-size:15.5px;
+    color:var(--muted);
+    line-height:1.5;
+    margin-top:4px;
+    margin-bottom:6px;
+  }
+  .results{
+    background:var(--teal-dark);
+    color:#fff;
+    border-radius:4px;
+    padding:28px 30px;
+  }
+  .results h2{
+    color:#fff;
+    margin-top:0;
+    font-size:17px;
+  }
+  .badge{
+    position:absolute;
+    top:-16px;
+    right:24px;
+    background:var(--gold);
+    color:#2A1F0C;
+    font-family:-apple-system,Helvetica,Arial,sans-serif;
+    font-weight:700;
+    font-size:12px;
+    padding:6px 14px;
+    border-radius:20px;
+    letter-spacing:.5px;
+    display:none;
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+  }
+  .badge.show{display:block;}
+  table.fields{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:14px;
+    font-family:'Courier New',monospace;
+    font-size:16.5px;
+  }
+  table.fields th{
+    text-align:left;
+    font-family:-apple-system,Helvetica,Arial,sans-serif;
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    color:#B9C9C2;
+    padding:6px 8px;
+    border-bottom:1px solid rgba(255,255,255,.2);
+  }
+  table.fields td{
+    padding:7px 8px;
+    border-bottom:1px solid rgba(255,255,255,.1);
+  }
+  table.fields tr.section td{
+    padding-top:16px;
+    font-family:-apple-system,Helvetica,Arial,sans-serif;
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    color:var(--gold);
+    border-bottom:none;
+  }
+  table.fields td.val{
+    text-align:right;
+    font-weight:700;
+  }
+  .balance-line td{
+    font-size:18px;
+    padding-top:12px;
+  }
+  .balance-line td.val{color:var(--gold);}
+  .cap-note{
+    display:none;
+    margin-top:16px;
+    background:rgba(184,134,59,.15);
+    border:1px solid var(--gold);
+    border-radius:3px;
+    padding:12px 14px;
+    font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    color:#F0E3CB;
+  }
+  .copybox{
+    margin-top:20px;
+    background:#0F2822;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:3px;
+    padding:14px 16px;
+    font-family:'Courier New',monospace;
+    font-size:15.5px;
+    line-height:1.6;
+    white-space:pre-wrap;
+  }
+  button{
+    font-family:-apple-system,Helvetica,Arial,sans-serif;
+    background:var(--gold);
+    color:#2A1F0C;
+    border:none;
+    padding:10px 18px;
+    border-radius:3px;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+    margin-top:12px;
+  }
+  button:hover{opacity:.9;}
+  .checklist{
+    font-family:-apple-system,Helvetica,Arial,sans-serif;
+    font-size:16px;
+    color:var(--muted);
+    line-height:1.8;
+  }
+  .checklist li{margin-bottom:4px;}
+  .footer-note{
+    max-width:980px;
+    margin:0 auto;
+    padding:0 24px;
+    font-family:-apple-system,Helvetica,Arial,sans-serif;
+    font-size:14.5px;
+    color:var(--muted);
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>Calculadora de RoomTax by Lumen & Lobe LLC</h1>
+  <div class="tag">Alojamiento Corto Plazo · Tasa 7%</div>
+</div>
+<div class="wrap">
+  <div class="step">
+    <div class="step-num">PASO 1</div>
+    <h2>Sube el CSV de transacciones de Airbnb</h2>
+    <p class="desc">Airbnb → Ingresos → Descargar CSV del período. El sistema cuenta automáticamente las noches ocupadas y valida el ingreso bruto contra el reporte PDF del Paso 2.</p>
+    <input type="file" id="csvFile" accept=".csv">
+    <div class="csv-status" id="csvStatus"></div>
+    <label>Noches ocupadas del mes (se llena automático con el CSV — puedes corregirlo a mano)</label>
+    <div class="hint">Compara con "Nights booked" del PDF: si una estadía cruzó de un mes a otro, el CSV puede contar menos noches que el PDF (el pago salió en el mes anterior). En ese caso, escribe aquí el número del PDF.</div>
+    <input type="number" step="1" min="0" id="nochesOcupadas" placeholder="0">
+  </div>
+  <div class="step">
+    <div class="step-num">PASO 2</div>
+    <h2>Copia 3 valores del PDF "Earnings Report" de Airbnb</h2>
+    <p class="desc">Airbnb → Ingresos → Reportes → Earnings Report (mensual). El título sobre cada campo vacío te indica qué valor buscar en el PDF y en qué sección aparece. Cópialos exactamente como aparecen (incluyendo el signo negativo si lo tienen).</p>
+    <div class="row2">
+      <div>
+        <label>Período (mes / año)</label>
+        <input type="month" id="periodo" value="2026-06">
+      </div>
+      <div>
+        <label>Gross earnings (sección Homes)</label>
+        <input type="number" step="0.01" id="grossEarnings" placeholder="3719.50">
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Adjustments (sección Homes — negativo si aplica)</label>
+        <input type="number" step="0.01" id="adjustments" placeholder="-771.50">
+      </div>
+      <div>
+        <label>Airbnb remitted tax (sección Taxes)</label>
+        <input type="number" step="0.01" id="remittedTax" placeholder="142.28">
+      </div>
+    </div>
+    <div class="hint">Nota: si el ajuste viene de una resolución (reembolso o pago de Resolutions), entra el monto una sola vez en "Adjustments" — el PDF lo muestra también en "Earnings Types", pero es el mismo dinero.</div>
+  </div>
+  <div class="step" style="position:relative;">
+    <div class="step-num">RESULTADO</div>
+    <div class="badge" id="matchBadge">✓ CUADRA CON AIRBNB</div>
+    <div class="results">
+      <h2>Valores exactos para el portal roomtax.tourism.pr.gov</h2>
+      <table class="fields">
+        <tr><th colspan="2">Parte II — Total de Ingresos</th></tr>
+        <tr><td>Ingreso por Habitaciones</td><td class="val" id="outIngreso">—</td></tr>
+        <tr><td>Total de Ingresos</td><td class="val" id="outIngreso2">—</td></tr>
+        <tr class="section"><td colspan="2">Parte III — Cómputo del Impuesto</td></tr>
+        <tr><td>Ingreso Tributable</td><td class="val" id="outTributable">—</td></tr>
+        <tr><td>Impuesto (7%)</td><td class="val" id="outImpuesto">—</td></tr>
+        <tr><td>Crédito por Impuesto Pagado por Plataforma</td><td class="val" id="outCredito">—</td></tr>
+        <tr class="balance-line"><td>Balance Pendiente de Pago</td><td class="val" id="outBalance">—</td></tr>
+        <tr><td>Cantidad Pagada con esta Declaración</td><td class="val" id="outPagada">—</td></tr>
+        <tr class="section"><td colspan="2">Parte IV — Datos Estadísticos</td></tr>
+        <tr><td>Número de Habitación/Noches</td><td class="val" id="outNochesMes">—</td></tr>
+        <tr><td>Número de Habitación/Noches Disponibles</td><td class="val">0</td></tr>
+        <tr><td>Número de Habitación/Noches Complementarias</td><td class="val">0</td></tr>
+        <tr><td>Número de Habitación/Noches Ocupadas</td><td class="val" id="outOcupadas">—</td></tr>
+        <tr><td>Número de Habitación/Noches Ocupadas por OTA</td><td class="val">0</td></tr>
+        <tr><td>Tasa de Ocupación Mensual</td><td class="val">0%</td></tr>
+        <tr><td>Tarifa Promedio Diaria</td><td class="val" id="outTarifa">—</td></tr>
+      </table>
+      <div class="cap-note" id="capNote"></div>
+      <div class="copybox" id="copyBox">Sube el CSV y llena los 4 campos del PDF para generar el resumen.</div>
+      <button onclick="copyResumen()">Copiar resumen al portapapeles</button>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">DOCUMENTOS</div>
+    <h2>Sube esto como respaldo del crédito en el portal</h2>
+    <ul class="checklist">
+      <li>☐ El PDF "Earnings Report" del mes (el mismo que usaste en el Paso 2)</li>
+      <li>☐ El CSV de transacciones del mes (el mismo que subiste en el Paso 1)</li>
+    </ul>
+  </div>
+</div>
+<div class="footer-note">
+  Nota: si el ingreso bruto del CSV (Reservation rows) y el "Gross earnings" del PDF difieren por más de $5, revisa que ambos archivos sean del mismo mes exacto antes de radicar.
+</div>
+<script>
+let csvNights = 0;
+let csvGross = 0;
+let csvParsed = false;
+let csvBaseStatus = '';
+let csvHasReservas = false;
+// Parser CSV propio (RFC 4180) — sin dependencias externas, funciona sin internet.
+function parseCSV(text){
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i = 0; i < text.length; i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ row.push(field); field = ''; }
+      else if(c === '\n'){ row.push(field); field = ''; rows.push(row); row = []; }
+      else if(c !== '\r') field += c;
+    }
+  }
+  if(field !== '' || row.length){ row.push(field); rows.push(row); }
+  return rows;
+}
+function csvToObjects(text){
+  const rows = parseCSV(text).filter(r => r.length > 1 || (r[0]||'').trim() !== '');
+  if(!rows.length) return [];
+  const headers = rows[0].map(h => h.trim());
+  return rows.slice(1).map(r => {
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = r[i] !== undefined ? r[i] : ''; });
+    return obj;
+  });
+}
+document.getElementById('csvFile').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const data = csvToObjects(ev.target.result);
+    // Acepta encabezados de Airbnb en inglés o español.
+    function pick(row, candidates){
+      for(const c of candidates){ if(row[c] !== undefined) return row[c]; }
+      return '';
+    }
+    const TYPE_COLS = ['Type','Tipo'];
+    const NIGHTS_COLS = ['Nights','Noches'];
+    const GROSS_COLS = ['Gross earnings','Ganancias brutas','Ingresos brutos'];
+    let nights = 0, gross = 0, count = 0;
+    data.forEach(row=>{
+      const tipo = String(pick(row, TYPE_COLS)).trim().toLowerCase();
+      if(tipo.startsWith('reserv')){
+        const n = parseFloat(pick(row, NIGHTS_COLS));
+        const g = parseFloat(String(pick(row, GROSS_COLS)).replace(/[$,]/g,''));
+        if(!isNaN(n)) nights += n;
+        if(!isNaN(g)) gross += g;
+        count++;
+      }
+    });
+    csvNights = nights;
+    csvGross = gross;
+    csvParsed = true;
+    const statusEl = document.getElementById('csvStatus');
+    csvHasReservas = count > 0;
+    if(count === 0){
+      const headers = data.length ? Object.keys(data[0]).join(', ') : '(archivo vacío)';
+      csvBaseStatus = `No se detectaron reservas en el CSV. Columnas encontradas: ${headers}. Verifica que sea el CSV de transacciones de Airbnb, o entra las noches ocupadas a mano abajo.`;
+      statusEl.className = 'csv-status show warn';
+    } else {
+      csvBaseStatus = `${count} reservas detectadas · ${nights} noches ocupadas · $${gross.toFixed(2)} en ingreso bruto (según CSV)`;
+      statusEl.className = 'csv-status show';
+      document.getElementById('nochesOcupadas').value = nights;
+    }
+    statusEl.innerHTML = csvBaseStatus;
+    calculate();
+  };
+  reader.readAsText(file);
+});
+['grossEarnings','adjustments','remittedTax','periodo','nochesOcupadas'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', calculate);
+});
+function daysInMonth(periodoStr){
+  if(!periodoStr) return 30;
+  const [y,m] = periodoStr.split('-').map(Number);
+  return new Date(y, m, 0).getDate();
+}
+function fmtMoney(n){
+  return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtWhole(n){
+  return '$' + Math.round(n).toLocaleString('en-US');
+}
+function calculate(){
+  const gross = parseFloat(document.getElementById('grossEarnings').value) || 0;
+  const adj = parseFloat(document.getElementById('adjustments').value) || 0;
+  const remitted = parseFloat(document.getElementById('remittedTax').value) || 0;
+  const periodo = document.getElementById('periodo').value;
+  const ocupadasManual = parseInt(document.getElementById('nochesOcupadas').value, 10) || 0;
+  if(!csvParsed && gross === 0 && adj === 0 && remitted === 0 && ocupadasManual === 0) return;
+  const ingreso = gross + adj;
+  const impuesto = ingreso * 0.07;
+  // El portal no acepta un crédito mayor al impuesto: se aplica tope automáticamente.
+  const creditoCapped = remitted > impuesto && impuesto > 0;
+  const credito = impuesto > 0 ? Math.min(remitted, impuesto) : remitted;
+  const balance = Math.max(0, impuesto - credito);
+  document.getElementById('outIngreso').textContent = fmtMoney(ingreso);
+  document.getElementById('outIngreso2').textContent = fmtMoney(ingreso);
+  document.getElementById('outTributable').textContent = fmtMoney(ingreso);
+  document.getElementById('outImpuesto').textContent = fmtMoney(impuesto);
+  document.getElementById('outCredito').textContent = fmtMoney(credito);
+  document.getElementById('capNote').style.display = creditoCapped ? 'block' : 'none';
+  if(creditoCapped){
+    document.getElementById('capNote').textContent =
+      `Airbnb remitió ${fmtMoney(remitted)}, más que el impuesto del mes. El portal solo acepta hasta el monto del impuesto, así que el crédito se ajustó a ${fmtMoney(credito)}. El balance queda en $0.00 — no pagas nada.`;
+  }
+  document.getElementById('outBalance').textContent = fmtMoney(balance);
+  document.getElementById('outPagada').textContent = fmtMoney(balance);
+  const noches = daysInMonth(periodo);
+  const ocupadas = ocupadasManual;
+  const tarifa = ocupadas > 0 ? ingreso / ocupadas : 0;
+  document.getElementById('outNochesMes').textContent = noches;
+  document.getElementById('outOcupadas').textContent = ocupadas;
+  document.getElementById('outTarifa').textContent = fmtMoney(tarifa);
+  // Validation badge
+  const badge = document.getElementById('matchBadge');
+  const statusEl = document.getElementById('csvStatus');
+  if(csvParsed && csvHasReservas && gross !== 0){
+    const diff = Math.abs(csvGross - gross);
+    if(diff <= 5){
+      badge.className = 'badge show';
+      statusEl.className = 'csv-status show';
+      statusEl.innerHTML = csvBaseStatus;
+    } else {
+      badge.className = 'badge';
+      statusEl.className = 'csv-status show warn';
+      statusEl.innerHTML = csvBaseStatus + `<br>⚠ Diferencia de ${fmtMoney(diff)} entre el CSV y el PDF — confirma que ambos son del mismo período.`;
+    }
+  } else {
+    badge.className = 'badge';
+  }
+  const resumen =
+`ROOMTAX — CASA SOLERA — Período ${periodo}
+Alojamiento a Corto Plazo · Tasa 7%
+PARTE II
+Ingreso por Habitaciones: ${fmtWhole(ingreso)}
+Total de Ingresos: ${fmtWhole(ingreso)}
+PARTE III
+Ingreso Tributable: ${fmtWhole(ingreso)}
+Impuesto (7%): ${fmtWhole(impuesto)}
+Crédito por Impuesto Pagado por Plataforma: ${fmtWhole(credito)}${creditoCapped ? ' (ajustado al tope del impuesto; Airbnb remitió ' + fmtWhole(remitted) + ')' : ''}
+Balance Pendiente de Pago: ${fmtWhole(balance)}
+Cantidad Pagada con esta Declaración: ${fmtWhole(balance)}
+PARTE IV
+Número de Habitación/Noches: ${noches}
+Número de Habitación/Noches Disponibles: 0
+Número de Habitación/Noches Complementarias: 0
+Número de Habitación/Noches Ocupadas: ${ocupadas}
+Número de Habitación/Noches Ocupadas por OTA: 0
+Tasa de Ocupación Mensual: 0%
+Tarifa Promedio Diaria: ${fmtWhole(tarifa)}
+Documentos a subir como respaldo: PDF Earnings Report + CSV del mes.`;
+  document.getElementById('copyBox').textContent = resumen;
+}
+function copyResumen(){
+  const text = document.getElementById('copyBox').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = event.target;
+    const original = btn.textContent;
+    btn.textContent = '✓ Copiado';
+    setTimeout(()=>{btn.textContent = original;}, 1500);
+  });
+}
+</script>
+</body>
+</html>
